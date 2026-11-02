@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+data/raw/
+*.hdf5
+*.pt
+*.zip
+results/**/log_*.txt
+results/synthetic/DONE
