@@ -11,7 +11,7 @@ cols = [("mean_per", "mean PER"), ("mean_per_moderate", "PER moderate-drift days
         ("rollback_or_reject", "reject/rollback days")]
 out = [f"Seeds: {len(runs)} ({', '.join(f.split('_s')[-1][:-5] for f in files)}). mean ± std across seeds. LM-off phoneme error rate.\n",
        "| method | " + " | ".join(c[1] for c in cols) + " |", "|---|" + "---|" * len(cols)]
-get = lambda r, m, k: next(s for s in r if s["method"] == m)[k]
+get = lambda r, m, k: next(s for s in r if s["method"] == m).get(k, float("nan"))
 for m in methods:
     cells = []
     for k, _ in cols:

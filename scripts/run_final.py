@@ -19,6 +19,7 @@ ap.add_argument("--no-tuned", action="store_true")
 ap.add_argument("--gaps", default="1,5,10,20")
 ap.add_argument("--probe", default="none,steadyvoice_noguard,steadyvoice")
 ap.add_argument("--methods", default="none,oracle,periodic7,corp,steadyvoice_noguard,guard_only,steadyvoice")
+ap.add_argument("--min-rho", type=float, default=0.5, help="predictor reliability gate; -1 disables the fallback (control)")
 ap.add_argument("--out", default="results/final")
 a = ap.parse_args()
 torch.set_num_threads(4)
@@ -36,5 +37,5 @@ for seed in map(int, a.seeds.split(",")):
     run_experiment(days, cfg.n_phon, a.k, TrainCfg(steps=a.steps, seed=seed), a.methods.split(","),
                    world.corpus(3000, 123), a.out, f"k{a.k}_s{seed}", "cpu", n_perturb=0 if a.natural_only else 80,
                    gaps=tuple(int(g) for g in a.gaps.split(",") if g), probe_methods=tuple(a.probe.split(",")),
-                   hp_override=hp)
+                   hp_override=hp, min_rho=a.min_rho)
     print("finished seed", seed, flush=True)

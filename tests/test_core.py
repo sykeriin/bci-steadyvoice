@@ -128,3 +128,31 @@ def test_guard_rollback_and_calibration(monkeypatch):
     g.last_good = mk(0.6)                                         # nothing healthy any more
     s, info = g.step(ctx, [], carry=mk(0.5), cand=mk(0.45)); assert info["action"] == "calibrate"
     assert calib.labels_used == 20                                # and it is charged
+
+
+def test_unreliable_predictor_falls_back_to_scheduled_calibration(monkeypatch):
+    """A predictor that cannot rank PER must never let the label-free candidate through."""
+    from types import SimpleNamespace
+    import steadyvoice.guard.policy as pol
+    mk = lambda v: {"b": torch.tensor([float(v)])}
+    monkeypatch.setattr(pol, "compute_signals", lambda ctx, s, xs: (_ for _ in ()).throw(AssertionError("signals must not be used")))
+    monkeypatch.setattr(pol, "supervised_fit", lambda ctx, s, xl, yl: mk(0.01))
+    calib = SimpleNamespace(labels_used=0)
+    def req(n): calib.labels_used += n; return [None] * n, [None] * n
+    calib.request = req
+    ctx = SimpleNamespace(hp=dict(oracle_n=20, fallback_days=7), calib=calib)
+    g = pol.Guard(SimpleNamespace(reliable=False, predict=lambda s: 0.0)); g.start(mk(0.5))
+    s, i = g.step(ctx, [], carry=mk(0.5), cand=mk(0.0), date=10); assert i["action"] == "fallback_carry" and float(s["b"][0]) == 0.5
+    s, i = g.step(ctx, [], carry=mk(0.5), cand=mk(0.0), date=16); assert i["action"] == "fallback_carry"
+    s, i = g.step(ctx, [], carry=mk(0.5), cand=mk(0.0), date=17); assert i["action"] == "calibrate" and calib.labels_used == 20
+    s, i = g.step(ctx, [], carry=mk(0.01), cand=mk(0.0), date=18); assert i["action"] == "fallback_carry"
+
+
+def test_predictor_marked_unreliable_when_training_signal_is_constant():
+    import numpy as np
+    from steadyvoice.guard.predictor import PERPredictor
+    from scipy.stats import spearmanr
+    X = np.random.default_rng(0).normal(size=(20, 5)); y = np.zeros(20)       # every training example has PER 0
+    p = PERPredictor().fit(X, y)
+    rho = spearmanr([p.predict_vec(x) for x in X], y)[0]
+    assert not np.isfinite(rho)                                                 # NaN -> fit_predictor marks it unreliable

@@ -23,6 +23,7 @@ from .signals import SIGNAL_NAMES, compute_signals, to_vec
 class PERPredictor:
     def __init__(self, ridge: float = 1.0):
         self.ridge, self.mu, self.sd, self.w, self.b = ridge, None, None, None, 0.0
+        self.reliable, self.fit_rho = True, float("nan")
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         self.mu, self.sd = X.mean(0), X.std(0) + 1e-8
@@ -60,7 +61,7 @@ def perturb(xs: List[np.ndarray], rng: np.random.Generator, s: float) -> List[np
 
 
 def fit_predictor(ctx: Ctx, days, states, n_perturb: int = 80, n_utts: int = 12, seed: int = 0,
-                  log=print):
+                  log=print, min_rho: float = 0.5):
     """Returns (predictor, diagnostics dict with in-sample Spearman per signal)."""
     rng = np.random.default_rng(seed)
     X, y = [], []
@@ -84,6 +85,13 @@ def fit_predictor(ctx: Ctx, days, states, n_perturb: int = 80, n_utts: int = 12,
     diag = {n: float(spearmanr(X[:, k], y)[0]) for k, n in enumerate(SIGNAL_NAMES)}
     fit = np.array([pred.predict_vec(x) for x in X])
     diag["fit_spearman"] = float(spearmanr(fit, y)[0])
+    # Reliability gate: a predictor that cannot rank true PER on its own training examples (NaN when every
+    # example has ~identical PER, i.e. the training days contain no failure examples) must not be trusted.
+    pred.fit_rho = diag["fit_spearman"]
+    pred.reliable = bool(np.isfinite(pred.fit_rho) and pred.fit_rho >= min_rho)
+    diag["reliable"] = pred.reliable
+    if not pred.reliable:
+        log("  WARNING: guard predictor unreliable -> guard falls back to fixed-schedule calibration, no label-free adaptation")
     log(f"  guard predictor fit on {len(y)} labelled-train examples; "
         f"spearman(signal, PER)={ {k: round(v, 2) for k, v in diag.items()} }")
     return pred, diag

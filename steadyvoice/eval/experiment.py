@@ -42,7 +42,7 @@ def build_method(m: str, pred):
 
 def run_experiment(days, n_phon: int, k: int, tcfg: TrainCfg, methods: List[str], lm_extra, out_dir: str,
                    tag: str, device: str, n_utts_ref: int = 60, log=print, n_perturb: int = 80,
-                   gaps=(), probe_methods=(), hp_override=None, return_ctx: bool = False):
+                   gaps=(), probe_methods=(), hp_override=None, return_ctx: bool = False, min_rho: float = 0.5):
     os.makedirs(out_dir, exist_ok=True)
     C = days[0].adapt_x[0].shape[1]
     train_days = days[:k]
@@ -55,7 +55,7 @@ def run_experiment(days, n_phon: int, k: int, tcfg: TrainCfg, methods: List[str]
     ctx = Ctx(model, C, tcfg.adapter, tcfg.rank, device, lm)
     ctx.ref = compute_reference(ctx, train_days, states, n_utts_ref)
     log("[2/4] guard predictor on labelled TRAINING days only")
-    pred, pdiag = fit_predictor(ctx, train_days, states, n_perturb=n_perturb, seed=tcfg.seed, log=log)
+    pred, pdiag = fit_predictor(ctx, train_days, states, n_perturb=n_perturb, seed=tcfg.seed, log=log, min_rho=min_rho)
     stream, rows = SessionStream(days), {}
     log("[3/4] forward simulation")
     for m in methods:

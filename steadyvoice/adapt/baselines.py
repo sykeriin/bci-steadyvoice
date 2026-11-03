@@ -128,4 +128,4 @@ class GuardedNoAdapt(AdaptMethod):
         self.guard.start(init_state)
 
     def adapt(self, ctx, state, batch):
-        return self.guard.step(ctx, list(batch.adapt_x), carry=state, cand=state)
+        return self.guard.step(ctx, list(batch.adapt_x), carry=state, cand=state, date=batch.date)

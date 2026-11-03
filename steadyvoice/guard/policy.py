@@ -15,12 +15,16 @@ class Guard:
     def __init__(self, predictor: PERPredictor, hp: Optional[dict] = None):
         self.pred, self.hp = predictor, hp or {}
         self.last_good: Optional[State] = None
+        self.last_calib_date: Optional[int] = None
 
     def start(self, init_state: State):
         self.last_good = clone_state(init_state)
+        self.last_calib_date = None
 
-    def step(self, ctx: Ctx, xs, carry: State, cand: State):
+    def step(self, ctx: Ctx, xs, carry: State, cand: State, date: Optional[int] = None):
         hp = ctx.hp
+        if not getattr(self.pred, "reliable", True):
+            return self._fallback(ctx, carry, date)
         opts = {"carry": carry, "cand": cand}
         if self.last_good is not None:
             opts["last_good"] = self.last_good
@@ -42,3 +46,15 @@ class Guard:
             self.last_good = clone_state(state)
         info["action"] = action
         return state, info
+
+    def _fallback(self, ctx: Ctx, carry: State, date: Optional[int]):
+        """Predictor cannot be trusted: never use the label-free candidate; recalibrate on a fixed schedule
+        (every `fallback_days` calendar days, counted from the first deployed day), otherwise carry over."""
+        hp = ctx.hp
+        if self.last_calib_date is None:
+            self.last_calib_date = date if date is not None else 0
+        if date is not None and date - self.last_calib_date >= hp.get("fallback_days", 7):
+            xl, yl = ctx.calib.request(hp["oracle_n"])
+            self.last_calib_date = date
+            return supervised_fit(ctx, carry, xl, yl), {"action": "calibrate", "fallback": 1}
+        return carry, {"action": "fallback_carry", "fallback": 1}

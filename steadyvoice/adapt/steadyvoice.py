@@ -90,5 +90,5 @@ class SteadyVoice(AdaptMethod):
             s = fit_adapter(ctx, s, xs, loss_fn, hp["sv_epochs"], hp["sv_lr"], seed=r)
         if self.guard is None:
             return s, {**diag, "action": "accept"}
-        out, info = self.guard.step(ctx, xs, carry=state, cand=s)
+        out, info = self.guard.step(ctx, xs, carry=state, cand=s, date=batch.date)
         return out, {**diag, **info}
