@@ -7,3 +7,5 @@ data/raw/
 *.zip
 results/**/log_*.txt
 results/synthetic/DONE
+results/STRESS_DONE
+results/PIPELINE_DONE
