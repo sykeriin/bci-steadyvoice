@@ -15,7 +15,7 @@ from ..utils import per
 
 
 def run_forward(stream: SessionStream, ctx: Ctx, init_state: State, method: AdaptMethod, k: int,
-                with_lm_score: bool = True, log=print) -> List[Dict]:
+                with_lm_score: bool = True, log=print, probe_fn=None) -> List[Dict]:
     method.start(ctx, clone_state(init_state))
     state = clone_state(init_state)
     t_train_end = stream.days[k - 1].date
@@ -40,7 +40,30 @@ def run_forward(stream: SessionStream, ctx: Ctx, init_state: State, method: Adap
                    **{k_: v for k_, v in diag.items() if isinstance(v, (int, float, str))})
         if with_lm_score and ctx.lm is not None:
             row["per_lm"] = per(ey, ctx.lm_decode(lps))
+        if probe_fn is not None:                      # analysis-only diagnostic; uses labels, never feeds back
+            row["probe_per"] = probe_fn(ctx, state, stream.days[i])
         rows.append(row)
         log(f"    [{method.name}] day {i:2d} (+{row['days_since_train']:2d}d) PER {row['per']:.3f} "
             f"labels {row['labels_used']:2d} {diag.get('action', '')}")
+    return rows
+
+
+def run_gap_jump(stream: SessionStream, ctx: Ctx, init_state: State, method: AdaptMethod, k: int,
+                 gaps=(1, 5, 10, 20)) -> List[Dict]:
+    """Day-gap stress: from the last labelled state, adapt ONCE directly on day k+g-1 (intermediate days are
+    never seen), then score that day. Fresh method state per gap. Tests recovery from a long unobserved gap."""
+    rows = []
+    for g in gaps:
+        i = k + g - 1
+        if i >= len(stream):
+            continue
+        method.start(ctx, clone_state(init_state))
+        ctx.calib = stream.calibration(i)
+        state, diag = method.adapt(ctx, clone_state(init_state), stream.batch(i))
+        ey = stream.vault.eval_labels(i)
+        lps = ctx.logp(state, stream.eval_x(i))
+        rows.append(dict(method=method.name, gap=g, day=i, date=stream.days[i].date,
+                         days_since_train=stream.days[i].date - stream.days[k - 1].date,
+                         per=per(ey, ctx.greedy(lps)), labels_used=ctx.calib.labels_used,
+                         action=diag.get("action", "")))
     return rows

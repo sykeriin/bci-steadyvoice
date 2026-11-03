@@ -7,6 +7,7 @@ import numpy as np
 
 def summarize(rows_by_method: Dict[str, List[Dict]], baseline: str = "none", n_cal: int = 20) -> List[Dict]:
     base = {r["day"]: r["per"] for r in rows_by_method[baseline]}
+    orc = {r["day"]: r["per"] for r in rows_by_method["oracle"]} if "oracle" in rows_by_method else None
     out = []
     for m, rows in rows_by_method.items():
         pers = np.array([r["per"] for r in rows])
@@ -24,6 +25,8 @@ def summarize(rows_by_method: Dict[str, List[Dict]], baseline: str = "none", n_c
             final_third_per=float(pers[len(pers) * 2 // 3:].mean()),
             mean_per_lm=float(np.mean([r["per_lm"] for r in rows])) if "per_lm" in rows[0] else float("nan"),
             collapse_events=coll,
+            # days where PER > 2x the oracle's PER that day (oracle floored at 2% so a 0.5% oracle doesn't make 1.5% 'bad')
+            days_gt_2x_oracle=(sum(1 for r in rows if r["per"] > 2 * max(orc[r["day"]], 0.02)) if orc else -1),
             calib_days=sum(1 for r in rows if r["labels_used"] > 0),
             labels_used=int(sum(r["labels_used"] for r in rows)),
             labels_saved_vs_daily=int(n_cal * len(rows) - sum(r["labels_used"] for r in rows)),

@@ -20,7 +20,8 @@ from ..models.backbone import freeze_for_adaptation
 from ..train.backbone_train import TrainCfg, train_backbone
 from .metrics import summarize
 from .plots import plot_per_vs_days
-from .runner import run_forward
+from .probe import linear_probe_per
+from .runner import run_forward, run_gap_jump
 
 ABLATIONS = {"sv_nowarm": dict(sv_coral_warm=False), "sv_nopl": dict(use_pl=False),
              "sv_noal": dict(use_al=False), "sv_nocons": dict(use_cons=False)}
@@ -40,7 +41,8 @@ def build_method(m: str, pred):
 
 
 def run_experiment(days, n_phon: int, k: int, tcfg: TrainCfg, methods: List[str], lm_extra, out_dir: str,
-                   tag: str, device: str, n_utts_ref: int = 60, log=print):
+                   tag: str, device: str, n_utts_ref: int = 60, log=print, n_perturb: int = 80,
+                   gaps=(), probe_methods=(), hp_override=None, return_ctx: bool = False):
     os.makedirs(out_dir, exist_ok=True)
     C = days[0].adapt_x[0].shape[1]
     train_days = days[:k]
@@ -53,17 +55,22 @@ def run_experiment(days, n_phon: int, k: int, tcfg: TrainCfg, methods: List[str]
     ctx = Ctx(model, C, tcfg.adapter, tcfg.rank, device, lm)
     ctx.ref = compute_reference(ctx, train_days, states, n_utts_ref)
     log("[2/4] guard predictor on labelled TRAINING days only")
-    pred, pdiag = fit_predictor(ctx, train_days, states, seed=tcfg.seed, log=log)
+    pred, pdiag = fit_predictor(ctx, train_days, states, n_perturb=n_perturb, seed=tcfg.seed, log=log)
     stream, rows = SessionStream(days), {}
     log("[3/4] forward simulation")
     for m in methods:
-        ctx.hp = dict(DEFAULT_HP)
-        rows[m] = run_forward(stream, ctx, states[-1], build_method(m, pred), k, log=lambda s: None)
+        ctx.hp = {**DEFAULT_HP, **(hp_override or {})}
+        rows[m] = run_forward(stream, ctx, states[-1], build_method(m, pred), k, log=lambda s: None,
+                              probe_fn=linear_probe_per if m in probe_methods else None)
         r = rows[m]
         log(f"  {m:22s} mean PER {np.mean([x['per'] for x in r]):.3f} worst {max(x['per'] for x in r):.3f} "
             f"labels {sum(x['labels_used'] for x in r)}")
+    gap_rows = {}
+    for m in (methods if gaps else []):
+        ctx.hp = {**DEFAULT_HP, **(hp_override or {})}
+        gap_rows[m] = run_gap_jump(stream, ctx, states[-1], build_method(m, pred), k, gaps)
     summ = summarize(rows)
-    json.dump({"rows": rows, "summary": summ, "guard_signal_spearman": pdiag},
+    json.dump({"rows": rows, "gap_rows": gap_rows, "summary": summ, "guard_signal_spearman": pdiag},
               open(f"{out_dir}/results_{tag}.json", "w"), indent=1)
     plot_per_vs_days(rows, f"{out_dir}/per_vs_days_{tag}.png", title=f"{tag} (LM-off PER)")
-    return rows, summ
+    return (rows, summ, ctx, pred, states) if return_ctx else (rows, summ)
