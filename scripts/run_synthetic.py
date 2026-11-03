@@ -24,13 +24,15 @@ ap.add_argument("--days", type=int, default=26)
 ap.add_argument("--seed", type=int, default=0)
 ap.add_argument("--steps", type=int, default=1500)
 ap.add_argument("--methods", default="none,oracle,coral,tent,corp,steadyvoice_noguard,steadyvoice")
+ap.add_argument("--drift", default="linear")
+ap.add_argument("--natural-only", action="store_true", help="fit guard predictor on natural cross-day pairs only")
 ap.add_argument("--out", default="results/synthetic")
 a = ap.parse_args()
 os.makedirs(a.out, exist_ok=True)
 torch.set_num_threads(4)
 dev = "cuda" if torch.cuda.is_available() else "cpu"
 
-cfg = SynthConfig(n_days=a.days, n_train_days=a.k, seed=a.seed)
+cfg = SynthConfig(n_days=a.days, n_train_days=a.k, seed=a.seed, drift_family=a.drift)
 world, days = make_dataset(cfg)
 train_days = days[: a.k]
 print(f"[1/4] backbone on days 0..{a.k-1} (labelled), dates {[d.date for d in train_days]}")
@@ -42,7 +44,7 @@ lm = PhonemeNGramLM(world.corpus(3000, seed=123) + [y for d in train_days for y 
 ctx = Ctx(model, cfg.C, "affine", 16, dev, lm)
 ctx.ref = compute_reference(ctx, train_days, states)
 print("[2/4] fitting guard predictor on labelled TRAINING days only")
-pred, pdiag = fit_predictor(ctx, train_days, states, seed=a.seed)
+pred, pdiag = fit_predictor(ctx, train_days, states, n_perturb=0 if a.natural_only else 80, seed=a.seed)
 
 stream = SessionStream(days)
 init = states[-1]

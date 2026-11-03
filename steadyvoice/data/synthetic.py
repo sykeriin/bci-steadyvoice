@@ -41,6 +41,8 @@ class SynthConfig:
     dead_frac: float = 0.05
     jump_prob: float = 0.04
     jump_scale: float = 4.0
+    drift_family: str = "linear"   # "nonlinear" adds per-channel curvature (not in the guard's perturbation family)
+    curv_sd: float = 0.04
 
 
 class SyntheticWorld:
@@ -89,6 +91,8 @@ class Drift:
         self.offset = np.zeros(C)
         self.Q = np.eye(C)
         self.dead = np.zeros(C, bool)
+        self.curv = np.zeros(C)
+        self.nonlinear = False
 
     def step(self, cfg: SynthConfig, r: np.random.Generator, first: bool):
         if first:
@@ -100,11 +104,16 @@ class Drift:
         A = r.normal(size=(C, C))
         A = (A - A.T) / np.sqrt(C)
         self.Q = self.Q @ expm(A * cfg.rot_sd * s)
+        if cfg.drift_family == "nonlinear":
+            self.nonlinear = True
+            self.curv += r.normal(scale=cfg.curv_sd * s, size=C)
         if r.random() < cfg.dead_prob:
             self.dead[r.choice(C, size=max(1, int(cfg.dead_frac * C)), replace=False)] = True
 
     def apply(self, x: np.ndarray) -> np.ndarray:
         y = (x * np.exp(self.log_gain)) @ self.Q + self.offset
+        if self.nonlinear:
+            y = y + self.curv * y * np.abs(y)
         y[:, self.dead] = 0.1 * x[:, self.dead]
         return y.astype(np.float32)
 
@@ -112,6 +121,7 @@ class Drift:
         d = Drift(len(self.offset))
         d.log_gain, d.offset, d.Q, d.dead = (
             self.log_gain.copy(), self.offset.copy(), self.Q.copy(), self.dead.copy())
+        d.curv, d.nonlinear = self.curv.copy(), self.nonlinear
         return d
 
 
