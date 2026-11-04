@@ -9,7 +9,7 @@
     "days_since_calib": 3,
     "per": 0.007462686567164179,
     "labels_used": 0,
-    "adapt_seconds": 1.7299998944508843e-06,
+    "adapt_seconds": 1.1939999922105926e-06,
     "audio_seconds": 72.72,
     "per_lm": 0.0
    },
@@ -21,7 +21,7 @@
     "days_since_calib": 6,
     "per": 0.012195121951219513,
     "labels_used": 0,
-    "adapt_seconds": 2.9299999368959107e-06,
+    "adapt_seconds": 1.4520000490847451e-06,
     "audio_seconds": 74.82000000000001,
     "per_lm": 0.004878048780487805
    },
@@ -33,7 +33,7 @@
     "days_since_calib": 8,
     "per": 0.008639308855291577,
     "labels_used": 0,
-    "adapt_seconds": 2.339999809919391e-06,
+    "adapt_seconds": 7.149999987632327e-07,
     "audio_seconds": 71.18,
     "per_lm": 0.0
    },
@@ -45,7 +45,7 @@
     "days_since_calib": 11,
     "per": 0.01937046004842615,
     "labels_used": 0,
-    "adapt_seconds": 2.343999767617788e-06,
+    "adapt_seconds": 1.0829999723682704e-06,
     "audio_seconds": 80.02,
     "per_lm": 0.002421307506053269
    },
@@ -57,7 +57,7 @@
     "days_since_calib": 13,
     "per": 0.04666666666666667,
     "labels_used": 0,
-    "adapt_seconds": 1.7359998309984803e-06,
+    "adapt_seconds": 1.5239999697769235e-06,
     "audio_seconds": 68.82000000000001,
     "per_lm": 0.0044444444444444444
    },
@@ -69,7 +69,7 @@
     "days_since_calib": 16,
     "per": 0.08433734939759036,
     "labels_used": 0,
-    "adapt_seconds": 2.015000063693151e-06,
+    "adapt_seconds": 1.625999971111014e-06,
     "audio_seconds": 70.0,
     "per_lm": 0.004819277108433735
    },
@@ -81,7 +81,7 @@
     "days_since_calib": 17,
     "per": 0.15555555555555556,
     "labels_used": 0,
-    "adapt_seconds": 2.034000317507889e-06,
+    "adapt_seconds": 2.4760000201240473e-06,
     "audio_seconds": 71.58,
     "per_lm": 0.022222222222222223
    },
@@ -93,7 +93,7 @@
     "days_since_calib": 20,
     "per": 0.13711583924349882,
     "labels_used": 0,
-    "adapt_seconds": 2.2740005078958347e-06,
+    "adapt_seconds": 1.6940000477916328e-06,
     "audio_seconds": 73.42,
     "per_lm": 0.01182033096926714
    },
@@ -105,7 +105,7 @@
     "days_since_calib": 23,
     "per": 0.23126338329764454,
     "labels_used": 0,
-    "adapt_seconds": 2.1140003809705377e-06,
+    "adapt_seconds": 1.7220000358975085e-06,
     "audio_seconds": 71.82000000000001,
     "per_lm": 0.04925053533190578
    },
@@ -117,7 +117,7 @@
     "days_since_calib": 24,
     "per": 0.29545454545454547,
     "labels_used": 0,
-    "adapt_seconds": 2.701999619603157e-06,
+    "adapt_seconds": 1.5930000358821417e-06,
     "audio_seconds": 73.88,
     "per_lm": 0.11363636363636363
    },
@@ -129,7 +129,7 @@
     "days_since_calib": 25,
     "per": 0.38724373576309795,
     "labels_used": 0,
-    "adapt_seconds": 3.632999323599506e-06,
+    "adapt_seconds": 1.1070000027757487e-06,
     "audio_seconds": 72.56,
     "per_lm": 0.26879271070615035
    },
@@ -141,7 +141,7 @@
     "days_since_calib": 26,
     "per": 0.4182692307692308,
     "labels_used": 0,
-    "adapt_seconds": 1.9320004867040552e-06,
+    "adapt_seconds": 1.876000055744953e-06,
     "audio_seconds": 67.24,
     "per_lm": 0.2692307692307692
    },
@@ -153,7 +153,7 @@
     "days_since_calib": 27,
     "per": 0.35323383084577115,
     "labels_used": 0,
-    "adapt_seconds": 2.2009999156580307e-06,
+    "adapt_seconds": 1.1170000107085798e-06,
     "audio_seconds": 77.82000000000001,
     "per_lm": 0.1865671641791045
    },
@@ -165,7 +165,7 @@
     "days_since_calib": 29,
     "per": 0.44130434782608696,
     "labels_used": 0,
-    "adapt_seconds": 3.527999979269225e-06,
+    "adapt_seconds": 1.374000021314714e-06,
     "audio_seconds": 70.96000000000001,
     "per_lm": 0.2891304347826087
    },
@@ -177,7 +177,7 @@
     "days_since_calib": 32,
     "per": 0.5520581113801453,
     "labels_used": 0,
-    "adapt_seconds": 1.9240005713072605e-06,
+    "adapt_seconds": 1.0150000093744893e-06,
     "audio_seconds": 73.36,
     "per_lm": 0.4721549636803874
    },
@@ -189,7 +189,7 @@
     "days_since_calib": 33,
     "per": 0.5393794749403341,
     "labels_used": 0,
-    "adapt_seconds": 2.0469997252803296e-06,
+    "adapt_seconds": 5.656000041653897e-06,
     "audio_seconds": 73.16,
     "per_lm": 0.45823389021479716
    },
@@ -201,7 +201,7 @@
     "days_since_calib": 34,
     "per": 0.8167770419426048,
     "labels_used": 0,
-    "adapt_seconds": 2.10899997910019e-06,
+    "adapt_seconds": 1.5559999724246154e-06,
     "audio_seconds": 72.74,
     "per_lm": 0.9094922737306843
    },
@@ -213,7 +213,7 @@
     "days_since_calib": 35,
     "per": 0.8611111111111112,
     "labels_used": 0,
-    "adapt_seconds": 2.118000338668935e-06,
+    "adapt_seconds": 1.0740000107034575e-06,
     "audio_seconds": 68.0,
     "per_lm": 0.9120370370370371
    },
@@ -225,7 +225,7 @@
     "days_since_calib": 38,
     "per": 0.8565217391304348,
     "labels_used": 0,
-    "adapt_seconds": 2.3960001271916553e-06,
+    "adapt_seconds": 1.3110000054439297e-06,
     "audio_seconds": 70.66,
     "per_lm": 0.9217391304347826
    },
@@ -237,7 +237,7 @@
     "days_since_calib": 41,
     "per": 0.8623188405797102,
     "labels_used": 0,
-    "adapt_seconds": 1.6920002963161096e-06,
+    "adapt_seconds": 6.810000172663422e-07,
     "audio_seconds": 78.02,
     "per_lm": 0.9106280193236715
    },
@@ -249,7 +249,7 @@
     "days_since_calib": 42,
     "per": 0.8755555555555555,
     "labels_used": 0,
-    "adapt_seconds": 2.1290006770868786e-06,
+    "adapt_seconds": 1.0600000450722291e-06,
     "audio_seconds": 74.94,
     "per_lm": 0.9088888888888889
    }
@@ -271,7 +271,7 @@
    "labels_used": 0,
    "labels_saved_vs_daily": 420,
    "rollback_or_reject": 0,
-   "rtf": 3.1372242000978716e-08
+   "rtf": 2.1539287490831476e-08
   }
  ],
  "guard_signal_spearman": {
@@ -280,6 +280,7 @@
   "unconf": 0.8561116934120967,
   "lm_rewrite": 0.9872881491781881,
   "latent_dist": 0.716878094739897,
-  "fit_spearman": 0.8912745485508324
+  "fit_spearman": 0.8912745485508324,
+  "reliable": true
  }
 }
